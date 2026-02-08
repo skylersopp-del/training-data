@@ -1,0 +1,25 @@
+name: Interval Sync
+
+on:
+  schedule:
+    - cron: "0 * * * *"
+  workflow_dispatch: {}
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Download Interval.ICU data
+        run: |
+          curl -s "https://interval.icu/api/v1/athlete/YOUR_ID/workouts?key=YOUR_KEY" \
+            -o interval/workouts.json
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add interval/workouts.json
+          git commit -m "Auto-sync Interval.ICU data" || echo "No changes"
+          git push
