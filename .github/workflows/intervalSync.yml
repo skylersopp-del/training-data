@@ -5,21 +5,31 @@ on:
     - cron: "0 * * * *"
   workflow_dispatch: {}
 
+permissions:
+  contents: write
+
 jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Create output folder
+        run: mkdir -p interval
 
       - name: Download Interval.ICU data
         run: |
-          curl -s "https://interval.icu/api/v1/athlete/YOUR_ID/workouts?key=YOUR_KEY" \
+          curl -s "https://interval.icu/api/v1/athlete/i155257/workouts?key=6pmirqiemk2ca5vr60ldosi85" \
             -o interval/workouts.json
 
-      - name: Commit changes
+      - name: Set Git identity
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
+
+      - name: Commit changes
+        run: |
           git add interval/workouts.json
           git commit -m "Auto-sync Interval.ICU data" || echo "No changes"
           git push
